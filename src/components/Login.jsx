@@ -1,20 +1,24 @@
 import './Login.css'
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import CsrfToken from './CsrfToken';
+import { jwtDecode } from 'jwt-decode';
 
-function Login() {
-  const [email, setEmail] = useState('');
+const Login = ({ setToken, setUserId, csrfToken }) => {
+  const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState(null);
   const navigate = useNavigate();
+  const [success, setSuccess] = useState('');
 
   const handleLogin = async (e) => {
     e.preventDefault();
     setError(null);
 
     const loginData = {
-      email,
+      username,
       password,
+      csrfToken,
     };
 
     try {
@@ -27,15 +31,43 @@ function Login() {
       });
 
       if (!response.ok) {
-        const message = `Login failed: ${response.statusText}`;
-        throw new Error(message);
+        const message = await response.text();
+        throw new Error(message || `Login failed: ${response.statusText}`);
       }
 
+
       const data = await response.json();
-      console.log('Login successful:', data);
-      // Handle successful login, e.g., redirect to another page
+      const { token } = data;
+      const decodedToken = parseJwt(token);
+      const { id: userId, user, avatar, email, invite } = decodedToken;
+
+      localStorage.setItem('token', token);
+      localStorage.setItem('userId', userId);
+      localStorage.setItem('username', user);
+      localStorage.setItem('avatar', avatar);
+      localStorage.setItem('email', email);
+      localStorage.setItem('invite', invite);
+
+      setToken(token);
+      setUserId(userId);
+      setSuccess('Login successful');
+
+      setTimeout(() => {
+        navigate('/chat');
+      }, 1000);
+
     } catch (err) {
-      setError(err.message);
+      console.error('Failed to login:', err);
+      setError('Invalid credentials');
+    }
+  };
+
+  const parseJwt = (token) => {
+    try {
+      return jwtDecode(token);
+    } catch (e) {
+      console.error('Invalid token', e);
+      return {};
     }
   };
 
@@ -44,11 +76,11 @@ function Login() {
       <h2>Login</h2>
       <form onSubmit={handleLogin}>
         <div>
-          <label>Email:</label>
+          <label>Username:</label>
           <input
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            type="username"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
             required
           />
         </div>
@@ -61,11 +93,13 @@ function Login() {
             required
           />
         </div>
-        <button type="submit">Login</button>
+        <div className="button-container">
+          <button type="submit" className="login-button">Login</button>
+          <button type="button" onClick={() => navigate('/register')} className="register-button">Register</button>
+        </div>
       </form>
       {error && <p style={{ color: 'red' }}>{error}</p>}
       <div>
-        <button onClick={() => navigate('/register')}>Register</button>
       </div>
     </div>
   );

@@ -1,0 +1,30 @@
+
+form {
+    display: flex;
+    flex-direction: column; /* Stack form elements vertically */
+  }
+  
+  form > div {
+    margin-bottom: 15px; /* Space between form elements */
+  }
+  
+  button {
+    padding: 10px 20px;
+    margin: 5px; /* Space between buttons */
+    font-size: 16px;
+  }
+  
+  .register-button {
+    margin-left: 10px; /* Space between the Login and Register buttons */
+  }
+  
+  form > div > label {
+    display: block;
+    margin-bottom: 5px; /* Space between label and input */
+  }
+  
+  form > div > input {
+    width: 100%; /* Full-width input fields */
+    padding: 8px;
+    font-size: 16px;
+  }
