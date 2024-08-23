@@ -5,7 +5,7 @@ import Login from './components/Login.jsx';
 import Register from './components/Register.jsx';
 import Sidenav from './components/nevbar/Sidenav.jsx';
 import CsrfToken from './components/CsrfToken.jsx';
-import Chat from './components/chat.jsx';
+import Chat from './components/Chat.jsx';
 
 const App = () => {
   const [token, setToken] = useState(() => localStorage.getItem('token') || '');

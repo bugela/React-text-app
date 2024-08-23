@@ -1,8 +1,8 @@
 .chat-container {
     display: flex;
     flex-direction: column;
-    height: 100vh;
-    width: 100%;
+    height: 85vh;
+    width: 1095px;
     background-color: #1a1a1a; /* Dark background for visibility */
     color: #fff; /* White text color for contrast */
   }
@@ -17,6 +17,7 @@
   .message {
     display: flex;
     margin-bottom: 10px;
+    align-items: center;
   }
   
   .message-left {
@@ -26,14 +27,25 @@
   .message-right {
     justify-content: flex-end;
   }
+
+  .avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    margin: 0 10px;
+  }
+
+
   
-  .message-content {
-    background-color: #3a3a3a; /* Slightly different color for message bubbles */
+ .message-content {
+    /* Slightly different color for message bubbles */
+    background-color: #3a3a3a;   
     border-radius: 10px;
     padding: 10px;
     max-width: 60%;
-    color: #fff; /* Ensure text is visible on dark background */
-  }
+    /* Ensure text is visible on dark background */
+    color: #fff;   
+  }  
   
   .delete-button {
     background-color: red;
