@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import './Chat.css'; 
+import './Chat.css';
 
 const sanitizeInput = (input) => {
   const temp = document.createElement('div');
@@ -16,13 +16,9 @@ const Chat = ({ token, userId }) => {
   const [avatar, setAvatar] = useState(localStorage.getItem('avatar') || '');
 
   useEffect(() => {
-    if (!activeConversation) {
-      console.log('No active conversation selected.');
-      return;
-    }
-
     const fetchMessages = async () => {
-      console.log(`Fetching messages for conversation: ${activeConversation}`);
+      if (!activeConversation) return;
+
       try {
         const res = await fetch(`https://chatify-api.up.railway.app/messages?conversationId=${activeConversation}`, {
           method: 'GET',
@@ -32,28 +28,24 @@ const Chat = ({ token, userId }) => {
           },
         });
 
-        if (!res.ok) {
-          console.error('Failed to fetch messages:', await res.text());
-          throw new Error('Failed to fetch messages');
-        }
+        if (!res.ok) throw new Error('Failed to fetch messages');
 
         const data = await res.json();
-
-        // Ensure messages are structured properly before setting state
-        const formattedMessages = data.map(message => ({
+        const formattedMessages = data.map((message) => ({
           ...message,
           userId: message.userId, // Ensure userId is correctly mapped
           username: message.username, // Add username for display
           avatar: message.avatar, // Add avatar for display
         }));
 
-        setMessages(formattedMessages); // Update state with fetched messages
+        setMessages(formattedMessages);
       } catch (err) {
         console.error('Error fetching messages:', err);
         setError('Failed to fetch messages');
       }
     };
 
+    // Fetch messages when the component mounts or when the active conversation changes
     fetchMessages();
   }, [activeConversation, token]);
 
@@ -78,19 +70,23 @@ const Chat = ({ token, userId }) => {
         }),
       });
 
-      if (!res.ok) throw new Error(await res.text() || 'Failed to send message');
+      if (!res.ok) throw new Error('Failed to send message');
 
       const data = await res.json();
       const latestMessage = {
         ...data.latestMessage,
-        userId: userId, // Ensure message has userId for correct display
-        username: username, // Include the username
-        avatar: avatar, // Include the avatar
+        userId: userId,
+        username: username,
+        avatar: avatar,
       };
 
       setMessages((prevMessages) => [...prevMessages, latestMessage]);
       setNewMessage('');
       setError('');
+
+      // Store messages in localStorage
+      const storedMessages = JSON.parse(localStorage.getItem('messages')) || [];
+      localStorage.setItem('messages', JSON.stringify([...storedMessages, latestMessage]));
 
     } catch (err) {
       console.error('Error sending message:', err);
@@ -108,14 +104,30 @@ const Chat = ({ token, userId }) => {
         },
       });
 
-      if (!res.ok) throw new Error(await res.text() || 'Failed to delete message');
+      if (!res.ok) throw new Error('Failed to delete message');
 
       setMessages((prevMessages) => prevMessages.filter((message) => message.id !== msgId));
+
+      // Update localStorage
+      const storedMessages = JSON.parse(localStorage.getItem('messages')) || [];
+      const updatedMessages = storedMessages.filter((message) => message.id !== msgId);
+      localStorage.setItem('messages', JSON.stringify(updatedMessages));
+      
     } catch (err) {
       console.error('Error deleting message:', err);
       setError('Failed to delete message');
     }
   };
+
+  useEffect(() => {
+    // Load messages from localStorage on mount
+    const loadMessages = () => {
+      const storedMessages = JSON.parse(localStorage.getItem('messages')) || [];
+      setMessages(storedMessages);
+    };
+
+    loadMessages();
+  }, []);
 
   return (
     <div className="chat-container">
@@ -123,10 +135,7 @@ const Chat = ({ token, userId }) => {
         {messages.map((message) => {
           const isCurrentUser = message.userId === userId;
           return (
-            <div
-              key={message.id}
-              className={`message ${isCurrentUser ? 'message-right' : 'message-left'}`}
-            >
+            <div key={message.id} className={`message ${isCurrentUser ? 'message-right' : 'message-left'}`}>
               {!isCurrentUser && <img src={message.avatar} alt={`${message.username}'s avatar`} className="avatar" />}
               <div className="message-content">
                 <p>{message.text}</p>
@@ -156,3 +165,4 @@ const Chat = ({ token, userId }) => {
 };
 
 export default Chat;
+

@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import './Sidenav.css'; 
 
 const Sidenav = () => {
   const [isOpen, setIsOpen] = useState(false);
   const navigate = useNavigate(); 
+  const location = useLocation();
 
   const openNav = () => setIsOpen(true);
   const closeNav = () => setIsOpen(false);
@@ -21,6 +22,8 @@ const Sidenav = () => {
   };
 
   const avatar = localStorage.getItem('avatar'); // Retrieve the avatar URL from local storage
+  const isLoggedIn = !!localStorage.getItem('token');
+  const isLoginOrRegisterPage = location.pathname === '/' || location.pathname === '/register';
 
   return (
     <div>
@@ -35,7 +38,9 @@ const Sidenav = () => {
           )}
         </div>
 
-        <a href="#" className="logoutbtn" onClick={handleLogout}>Logout</a>
+        {isLoggedIn && !isLoginOrRegisterPage && (
+          <a href="#" className="logoutbtn" onClick={handleLogout}>Logout</a>
+        )}
       </div>
       
       <span 
